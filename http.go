@@ -2,6 +2,7 @@ package gitkit
 
 import (
 	"compress/gzip"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -222,6 +223,7 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 }
 
 func sendWebhook(url string) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	client := &http.Client{}
 	request, err := http.NewRequest("POST", url, nil)
 	if err != nil {
