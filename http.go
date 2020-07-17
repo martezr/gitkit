@@ -220,19 +220,23 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 	sendWebhook(s.config.WebhookURL)
 }
 
-func () sendWebhook(url string) {
+func sendWebhook(url string) {
 	client := &http.Client{}
 	request, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		logError(err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(request)
 	if err != nil {
-		log.Fatalln(err)
+		logError(err)
 	}
 	defer resp.Body.Close()
-	logInfo("Webhook", string(resp.Body))
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logError(err)
+	}
+	logInfo("Webhook", string(responseData))
 	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
 }
 
