@@ -217,6 +217,23 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 		return
 	}
 	logInfo("Webhook entrypoint", "")
+	sendWebhook(s.config.WebhookURL)
+}
+
+func () sendWebhook(url string) {
+	client := &http.Client{}
+	request, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(request)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer resp.Body.Close()
+	logInfo("Webhook", string(resp.Body))
+	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
 }
 
 func (s *Server) Setup() error {
