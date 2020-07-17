@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -224,17 +225,17 @@ func sendWebhook(url string) {
 	client := &http.Client{}
 	request, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		logError(err)
+		logError("error", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(request)
 	if err != nil {
-		logError(err)
+		logError("error", err)
 	}
 	defer resp.Body.Close()
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logError(err)
+		logError("error", err)
 	}
 	logInfo("Webhook", string(responseData))
 	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
