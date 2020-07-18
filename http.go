@@ -233,7 +233,7 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 		logError(context, err)
 		return
 	}
-	logInfo("Webhook entrypoint", "")
+	logInfo("Webhook entrypoint", rpc)
 	deployPuppetEnvironment(s.config.PeToken, s.config.PeFQDN)
 }
 
