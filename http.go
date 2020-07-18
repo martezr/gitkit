@@ -234,7 +234,9 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 		return
 	}
 	logInfo("Webhook entrypoint", rpc)
-	deployPuppetEnvironment(s.config.PeToken, s.config.PeFQDN)
+	if rpc == "git-receive-pack" {
+		deployPuppetEnvironment(s.config.PeToken, s.config.PeFQDN)
+	}
 }
 
 func deployPuppetEnvironment(petoken string, pefqdn string) {
