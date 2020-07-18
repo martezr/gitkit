@@ -233,7 +233,6 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 		logError(context, err)
 		return
 	}
-	logInfo("Webhook entrypoint", rpc)
 	if rpc == "git-receive-pack" {
 		deployPuppetEnvironment(s.config.PeToken, s.config.PeFQDN)
 	}
@@ -241,7 +240,7 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 
 func deployPuppetEnvironment(petoken string, pefqdn string) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	fmt.Println("Triggering environment deployment")
+	logInfo("webhook", "triggering puppet enterprise environment deployment")
 	requestBody, err := json.Marshal(map[string]bool{
 		"deploy-all": true,
 		"wait":       true,
