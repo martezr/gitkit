@@ -238,6 +238,7 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 }
 
 func deployPuppetEnvironment(petoken string, pefqdn string) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	fmt.Println("Triggering environment deployment")
 	requestBody, err := json.Marshal(map[string]bool{
 		"deploy-all": true,
@@ -268,7 +269,7 @@ func deployPuppetEnvironment(petoken string, pefqdn string) {
 		logError("", jsonErr)
 	}
 
-	logInfo("PE deployment", string(data))
+	fmt.Println(data)
 
 	//	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
 }
