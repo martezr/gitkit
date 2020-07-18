@@ -15,7 +15,8 @@ type Config struct {
 	AutoHooks  bool         // Automatically setup git hooks
 	Hooks      *HookScripts // Scripts for hooks/* directory
 	Auth       bool         // Require authentication
-	WebhookURL string       // Webhook URL
+	PeToken    string       // Puppet Enterpise Token
+	PeFQDN     string
 }
 
 // HookScripts represents all repository server-size git hooks

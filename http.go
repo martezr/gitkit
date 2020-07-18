@@ -14,6 +14,19 @@ import (
 	"syscall"
 )
 
+type DeployOutput struct {
+	Environment     string         `json:"environment"`
+	ID              int32          `json:"id"`
+	Status          string         `json:"status"`
+	DeploySignature string         `json:"deploy-signature"`
+	FileSync        FileSyncOutput `json:"file-synce"`
+}
+
+type FileSyncOutput struct {
+	EnvironmentCommit string `json:"environment-commit"`
+	CodeCommit        string `json:"code-commit"`
+}
+
 type service struct {
 	method  string
 	suffix  string
@@ -219,28 +232,43 @@ func (s *Server) postRPC(rpc string, w http.ResponseWriter, r *Request) {
 		return
 	}
 	logInfo("Webhook entrypoint", "")
-	sendWebhook(s.config.WebhookURL)
+	deployPuppetEnvironment(s.config.PeToken, s.config.PeFQDN)
 }
 
-func sendWebhook(url string) {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+func deployPuppetEnvironment(petoken string, pefqdn string) {
+	fmt.Println("Triggering environment deployment")
+	requestBody, err := json.Marshal(map[string]bool{
+		"deploy-all": true,
+		"wait":       true,
+	})
 	client := &http.Client{}
-	request, err := http.NewRequest("POST", url, nil)
+	peurl := fmt.Sprintf("https://%s:8170/code-manager/v1/deploys", pefqdn)
+	var jsonStr = []byte(string(requestBody))
+	request, err := http.NewRequest("POST", peurl, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		logError("error", err)
+		log.Fatal(err)
 	}
+	request.Header.Set("X-Authentication", petoken)
 	request.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(request)
 	if err != nil {
-		logError("error", err)
+		logError("", err)
 	}
 	defer resp.Body.Close()
-	responseData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logError("error", err)
+	body, readErr := ioutil.ReadAll(resp.Body)
+	if readErr != nil {
+		logError("", readErr)
 	}
-	logInfo("Webhook", string(responseData))
-	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
+
+	var data []DeployOutput
+	jsonErr := json.Unmarshal(body, &data)
+	if jsonErr != nil {
+		logError("", jsonErr)
+	}
+
+	logInfo("PE deployment", data)
+
+	//	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
 }
 
 func (s *Server) Setup() error {
