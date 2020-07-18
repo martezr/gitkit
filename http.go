@@ -1,8 +1,10 @@
 package gitkit
 
 import (
+	"bytes"
 	"compress/gzip"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -246,7 +248,7 @@ func deployPuppetEnvironment(petoken string, pefqdn string) {
 	var jsonStr = []byte(string(requestBody))
 	request, err := http.NewRequest("POST", peurl, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		log.Fatal(err)
+		logError("", err)
 	}
 	request.Header.Set("X-Authentication", petoken)
 	request.Header.Set("Content-Type", "application/json")
@@ -266,7 +268,7 @@ func deployPuppetEnvironment(petoken string, pefqdn string) {
 		logError("", jsonErr)
 	}
 
-	logInfo("PE deployment", data)
+	logInfo("PE deployment", string(data))
 
 	//	fmt.Println("HTTP Response Status:", resp.StatusCode, http.StatusText(resp.StatusCode))
 }
